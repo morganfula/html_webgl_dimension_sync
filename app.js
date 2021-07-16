@@ -4,8 +4,9 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import fragment from './shaders/fragment.glsl';
 import vertex from './shaders/vertex.glsl';
 
-import testTexture from 'url:./water.jpg';
-console.log(testTexture);
+import * as dat from 'dat.gui';
+
+import testTexture from 'url:./texture.jpg';
 
 export default class Sketch {
   constructor(options) {
@@ -15,12 +16,13 @@ export default class Sketch {
 
     //! Camera
     this.camera = new THREE.PerspectiveCamera(
-      70,
+      30,
       this.width / this.height,
-      0.01,
-      10
+      10,
+      1000
     );
-    this.camera.position.z = 1;
+    this.camera.position.z = 600;
+    this.camera.fov = (2 * Math.atan(this.height / 2 / 600) * 180) / Math.PI;
 
     //!Scene
     this.scene = new THREE.Scene();
@@ -41,11 +43,21 @@ export default class Sketch {
     document.addEventListener('keyup', this.applyWireframe);
 
     this.time = 0;
+    this.setupSettings();
     this.resize();
     this.addObjects();
     this.render();
 
     this.setupResize();
+  }
+
+  setupSettings() {
+    this.settings = {
+      progress: 0,
+    };
+
+    this.gui = new dat.GUI();
+    this.gui.add(this.settings, 'progress', 0, 1, 0.001);
   }
 
   resize() {
@@ -62,12 +74,13 @@ export default class Sketch {
   }
 
   addObjects() {
-    this.geometry = new THREE.PlaneBufferGeometry(0.5, 0.5, 100, 100);
+    this.geometry = new THREE.PlaneBufferGeometry(500, 500, 100, 100);
 
     this.material = new THREE.ShaderMaterial({
       // wireframe: true,
       uniforms: {
         time: { value: 1.0 },
+        uProgress: { value: 1.0 },
         uTexture: { value: new THREE.TextureLoader().load(testTexture) },
         resolution: { value: new THREE.Vector2() },
       },
@@ -78,11 +91,14 @@ export default class Sketch {
 
     this.mesh = new THREE.Mesh(this.geometry, this.material);
     this.scene.add(this.mesh);
+    this.mesh.position.x = 300;
+    this.mesh.rotation.z = 0.5;
   }
 
   render() {
     this.time += 0.05;
     this.material.uniforms.time.value = this.time;
+    this.material.uniforms.uProgress.value = this.settings.progress;
     this.mesh.rotation.x = this.time / 2000;
     this.mesh.rotation.y = this.time / 1000;
 
