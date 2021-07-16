@@ -501,7 +501,7 @@ class Sketch {
     window.addEventListener('resize', this.resize.bind(this));
   }
   addObjects() {
-    this.geometry = new _three.PlaneBufferGeometry(500, 500, 100, 100);
+    this.geometry = new _three.PlaneBufferGeometry(300, 300, 100, 100);
     this.material = new _three.ShaderMaterial({
       // wireframe: true,
       uniforms: {
@@ -514,8 +514,11 @@ class Sketch {
         uTexture: {
           value: new _three.TextureLoader().load(_urlTextureJpgDefault.default)
         },
-        resolution: {
-          value: new _three.Vector2()
+        uResolution: {
+          value: new _three.Vector2(this.width, this.height)
+        },
+        uQuadSize: {
+          value: new _three.Vector2(300, 300)
         }
       },
       vertexShader: _shadersVertexGlslDefault.default,
@@ -31184,7 +31187,7 @@ exports.export = function (dest, destName, get) {
 },{}],"6JKfI":[function(require,module,exports) {
 module.exports="#define GLSLIFY 1\nuniform float time;\nuniform float uProgress;\nuniform sampler2D uTexture;\n\nvarying vec2 vUv;\nvoid main() {\n  vec4 image = texture(uTexture, vUv);\n  gl_FragColor = vec4(vUv, 0., 1.);\n  gl_FragColor = vec4(image);\n\n}";
 },{}],"4OTxZ":[function(require,module,exports) {
-module.exports="#define GLSLIFY 1\nuniform float time;\nuniform float uProgress;\n\nvarying vec2 vUv;\nvoid main() {\n  vUv = uv;\n  vec4 defaultState = modelMatrix * vec4( position, 1.0 );\n  vec4 fullScreenState = vec4( position, 1.0 );\n\n  vec4 finalState = mix(defaultState, fullScreenState, uProgress) ;\n\n  gl_Position = projectionMatrix * viewMatrix * finalState;\n}";
+module.exports="#define GLSLIFY 1\nuniform float time;\nuniform float uProgress;\nuniform vec2 uResolution;\nuniform vec2 uQuadSize;\n\nvarying vec2 vUv;\nvoid main() {\n  vUv = uv;\n  vec4 defaultState = modelMatrix * vec4( position, 1.0 );\n  vec4 fullScreenState = vec4( position, 1.0 );\n  fullScreenState.x *= uResolution.x/uQuadSize.x;\n  fullScreenState.y *= uResolution.y/uQuadSize.y;\n\n  vec4 finalState = mix(defaultState, fullScreenState, uProgress) ;\n\n  gl_Position = projectionMatrix * viewMatrix * finalState;\n}";
 },{}],"1pD2q":[function(require,module,exports) {
 var define;
 /**

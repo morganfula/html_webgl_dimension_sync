@@ -74,7 +74,7 @@ export default class Sketch {
   }
 
   addObjects() {
-    this.geometry = new THREE.PlaneBufferGeometry(500, 500, 100, 100);
+    this.geometry = new THREE.PlaneBufferGeometry(300, 300, 100, 100);
 
     this.material = new THREE.ShaderMaterial({
       // wireframe: true,
@@ -82,7 +82,8 @@ export default class Sketch {
         time: { value: 1.0 },
         uProgress: { value: 1.0 },
         uTexture: { value: new THREE.TextureLoader().load(testTexture) },
-        resolution: { value: new THREE.Vector2() },
+        uResolution: { value: new THREE.Vector2(this.width, this.height) },
+        uQuadSize: { value: new THREE.Vector2(300, 300) },
       },
 
       vertexShader: vertex,
