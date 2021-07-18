@@ -6,6 +6,8 @@ import vertex from './shaders/vertex.glsl';
 
 import * as dat from 'dat.gui';
 
+import gsap from 'gsap';
+
 import testTexture from 'url:./texture.jpg';
 
 export default class Sketch {
