@@ -514,6 +514,12 @@ class Sketch {
         uTexture: {
           value: new _three.TextureLoader().load(_urlTextureJpgDefault.default)
         },
+        uTextureSize: {
+          value: new _three.Vector2(100, 100)
+        },
+        uCorner: {
+          value: new _three.Vector2(0, 0)
+        },
         uResolution: {
           value: new _three.Vector2(this.width, this.height)
         },
@@ -544,7 +550,7 @@ new Sketch({
   domElement: document.getElementById('container')
 });
 
-},{"three":"1lq1c","three/examples/jsm/controls/OrbitControls.js":"5mYmG","./shaders/fragment.glsl":"6JKfI","./shaders/vertex.glsl":"4OTxZ","@parcel/transformer-js/lib/esmodule-helpers.js":"4LcgY","dat.gui":"1pD2q","url:./texture.jpg":"1VFU5"}],"1lq1c":[function(require,module,exports) {
+},{"three":"1lq1c","three/examples/jsm/controls/OrbitControls.js":"5mYmG","./shaders/fragment.glsl":"6JKfI","./shaders/vertex.glsl":"4OTxZ","@parcel/transformer-js/lib/esmodule-helpers.js":"7nHhY","dat.gui":"1pD2q","url:./texture.jpg":"1VFU5"}],"1lq1c":[function(require,module,exports) {
 var define;
 /**
 * @license
@@ -31142,7 +31148,7 @@ class MapControls extends OrbitControls {
   }
 }
 
-},{"three":"1lq1c","@parcel/transformer-js/lib/esmodule-helpers.js":"4LcgY"}],"4LcgY":[function(require,module,exports) {
+},{"three":"1lq1c","@parcel/transformer-js/lib/esmodule-helpers.js":"7nHhY"}],"7nHhY":[function(require,module,exports) {
 "use strict";
 
 exports.interopDefault = function (a) {
@@ -31185,9 +31191,9 @@ exports.export = function (dest, destName, get) {
   });
 };
 },{}],"6JKfI":[function(require,module,exports) {
-module.exports="#define GLSLIFY 1\nuniform float time;\nuniform float uProgress;\nuniform sampler2D uTexture;\n\nvarying vec2 vUv;\nvoid main() {\n  vec4 image = texture(uTexture, vUv);\n  gl_FragColor = vec4(vUv, 0., 1.);\n  gl_FragColor = vec4(image);\n\n}";
+module.exports="#define GLSLIFY 1\nuniform float time;\nuniform float uProgress;\nuniform vec2 uTextureSize;\nuniform sampler2D uTexture;\nvarying vec2 vUv;\n\nvarying vec2 vSize;\n\nvec2 getUV(vec2 uv, vec2 textureSize, vec2 quadSize) {\n  vec2 tempUV = uv - vec2(0.5);\n\n  float quadAspect = quadSize.x/quadSize.y;\n  float textureAspect = textureSize.x /textureSize.y;\n  if(quadAspect<textureAspect){\n    tempUV = tempUV* vec2(quadAspect/textureAspect,1.);\n  } else {\n    tempUV = tempUV* vec2(1.,textureAspect/quadAspect);\n  }\n\n  tempUV += vec2(0.5);\n  return tempUV;\n}\n\nvoid main() {\n\n  vec2 correctUV = getUV(vUv, uTextureSize, vSize);\n  vec4 image = texture(uTexture, correctUV);\n  gl_FragColor = vec4(vUv, 0., 1.);\n  gl_FragColor = vec4(image);\n\n}";
 },{}],"4OTxZ":[function(require,module,exports) {
-module.exports="#define GLSLIFY 1\nuniform float time;\nuniform float uProgress;\nuniform vec2 uResolution;\nuniform vec2 uQuadSize;\n\nvarying vec2 vUv;\nvoid main() {\n  vUv = uv;\n  vec4 defaultState = modelMatrix * vec4( position, 1.0 );\n  vec4 fullScreenState = vec4( position, 1.0 );\n  fullScreenState.x *= uResolution.x/uQuadSize.x;\n  fullScreenState.y *= uResolution.y/uQuadSize.y;\n\n  vec4 finalState = mix(defaultState, fullScreenState, uProgress) ;\n\n  gl_Position = projectionMatrix * viewMatrix * finalState;\n}";
+module.exports="#define GLSLIFY 1\nuniform float time;\nuniform float uProgress;\nuniform vec2 uResolution;\nuniform vec2 uQuadSize;\n\nvarying vec2 vUv;\nvarying vec2 vSize;\nvoid main() {\n  vUv = uv;\n  vec4 defaultState = modelMatrix * vec4( position, 1.0 );\n  vec4 fullScreenState = vec4( position, 1.0 );\n\n  fullScreenState.x *= uResolution.x/uQuadSize.x;\n  fullScreenState.y *= uResolution.y/uQuadSize.y;\n\n  vec4 finalState = mix(defaultState, fullScreenState, uProgress) ;\n\n  vSize = mix(uQuadSize, uResolution, uProgress);\n\n  gl_Position = projectionMatrix * viewMatrix * finalState;\n}";
 },{}],"1pD2q":[function(require,module,exports) {
 var define;
 /**
@@ -33670,7 +33676,7 @@ var define;
 
 },{}],"1VFU5":[function(require,module,exports) {
 module.exports = require('./bundle-url').getBundleURL() + "texture.de48ce3c.jpg"
-},{"./bundle-url":"13wgE"}],"13wgE":[function(require,module,exports) {
+},{"./bundle-url":"7h68L"}],"7h68L":[function(require,module,exports) {
 "use strict";
 
 /* globals document:readonly */
