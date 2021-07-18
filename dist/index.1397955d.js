@@ -451,7 +451,8 @@ var _shadersFragmentGlslDefault = _parcelHelpers.interopDefault(_shadersFragment
 var _shadersVertexGlsl = require('./shaders/vertex.glsl');
 var _shadersVertexGlslDefault = _parcelHelpers.interopDefault(_shadersVertexGlsl);
 var _datGui = require('dat.gui');
-require('gsap');
+var _gsap = require('gsap');
+var _gsapDefault = _parcelHelpers.interopDefault(_gsap);
 var _urlTextureJpg = require('url:./texture.jpg');
 var _urlTextureJpgDefault = _parcelHelpers.interopDefault(_urlTextureJpg);
 class Sketch {
@@ -518,8 +519,8 @@ class Sketch {
         uTextureSize: {
           value: new _three.Vector2(100, 100)
         },
-        uCorner: {
-          value: new _three.Vector2(0, 0)
+        uCorners: {
+          value: new _three.Vector2(0, 0, 0, 0)
         },
         uResolution: {
           value: new _three.Vector2(this.width, this.height)
@@ -531,6 +532,15 @@ class Sketch {
       vertexShader: _shadersVertexGlslDefault.default,
       fragmentShader: _shadersFragmentGlslDefault.default
     });
+    this.tl = new _gsapDefault.default.timeline().to(this.material.uniforms.uCorners.value, {
+      x: 1
+    }).to(this.material.uniforms.uCorners.value, {
+      y: 1
+    }, 0.1).to(this.material.uniforms.uCorners.value, {
+      z: 1
+    }, 0.2).to(this.material.uniforms.uCorners.value, {
+      w: 1
+    }, 0.3);
     this.mesh = new _three.Mesh(this.geometry, this.material);
     this.scene.add(this.mesh);
     this.mesh.position.x = 300;
@@ -539,7 +549,8 @@ class Sketch {
   render() {
     this.time += 0.05;
     this.material.uniforms.time.value = this.time;
-    this.material.uniforms.uProgress.value = this.settings.progress;
+    // this.material.uniforms.uProgress.value = this.settings.progress;
+    this.tl.progress(this.settings.progress);
     this.mesh.rotation.x = this.time / 2000;
     this.mesh.rotation.y = this.time / 1000;
     this.renderer.render(this.scene, this.camera);
@@ -551,7 +562,7 @@ new Sketch({
   domElement: document.getElementById('container')
 });
 
-},{"three":"1lq1c","three/examples/jsm/controls/OrbitControls.js":"5mYmG","./shaders/fragment.glsl":"6JKfI","./shaders/vertex.glsl":"4OTxZ","@parcel/transformer-js/lib/esmodule-helpers.js":"7nHhY","dat.gui":"1pD2q","url:./texture.jpg":"1VFU5","gsap":"1iecp"}],"1lq1c":[function(require,module,exports) {
+},{"three":"1lq1c","three/examples/jsm/controls/OrbitControls.js":"5mYmG","./shaders/fragment.glsl":"6JKfI","./shaders/vertex.glsl":"4OTxZ","@parcel/transformer-js/lib/esmodule-helpers.js":"3O9it","dat.gui":"1pD2q","gsap":"1iecp","url:./texture.jpg":"1VFU5"}],"1lq1c":[function(require,module,exports) {
 var define;
 /**
 * @license
@@ -31149,7 +31160,7 @@ class MapControls extends OrbitControls {
   }
 }
 
-},{"three":"1lq1c","@parcel/transformer-js/lib/esmodule-helpers.js":"7nHhY"}],"7nHhY":[function(require,module,exports) {
+},{"three":"1lq1c","@parcel/transformer-js/lib/esmodule-helpers.js":"3O9it"}],"3O9it":[function(require,module,exports) {
 "use strict";
 
 exports.interopDefault = function (a) {
@@ -31194,7 +31205,7 @@ exports.export = function (dest, destName, get) {
 },{}],"6JKfI":[function(require,module,exports) {
 module.exports="#define GLSLIFY 1\nuniform float time;\nuniform float uProgress;\nuniform vec2 uTextureSize;\nuniform sampler2D uTexture;\nvarying vec2 vUv;\n\nvarying vec2 vSize;\n\nvec2 getUV(vec2 uv, vec2 textureSize, vec2 quadSize) {\n  vec2 tempUV = uv - vec2(0.5);\n\n  float quadAspect = quadSize.x/quadSize.y;\n  float textureAspect = textureSize.x /textureSize.y;\n  if(quadAspect<textureAspect){\n    tempUV = tempUV* vec2(quadAspect/textureAspect,1.);\n  } else {\n    tempUV = tempUV* vec2(1.,textureAspect/quadAspect);\n  }\n\n  tempUV += vec2(0.5);\n  return tempUV;\n}\n\nvoid main() {\n\n  vec2 correctUV = getUV(vUv, uTextureSize, vSize);\n  vec4 image = texture(uTexture, correctUV);\n  gl_FragColor = vec4(vUv, 0., 1.);\n  gl_FragColor = vec4(image);\n\n}";
 },{}],"4OTxZ":[function(require,module,exports) {
-module.exports="#define GLSLIFY 1\nuniform float time;\nuniform float uProgress;\nuniform vec2 uResolution;\nuniform vec2 uQuadSize;\n\nvarying vec2 vUv;\nvarying vec2 vSize;\nvoid main() {\n  vUv = uv;\n  vec4 defaultState = modelMatrix * vec4( position, 1.0 );\n  vec4 fullScreenState = vec4( position, 1.0 );\n\n  fullScreenState.x *= uResolution.x/uQuadSize.x;\n  fullScreenState.y *= uResolution.y/uQuadSize.y;\n\n  vec4 finalState = mix(defaultState, fullScreenState, uProgress) ;\n\n  vSize = mix(uQuadSize, uResolution, uProgress);\n\n  gl_Position = projectionMatrix * viewMatrix * finalState;\n}";
+module.exports="#define GLSLIFY 1\nuniform float time;\nuniform float uProgress;\nuniform vec2 uResolution;\nuniform vec2 uQuadSize;\nuniform vec4 uCorners;\n\nvarying vec2 vUv;\nvarying vec2 vSize;\nvoid main() {\n  vUv = uv;\n  vec4 defaultState = modelMatrix * vec4( position, 1.0 );\n  vec4 fullScreenState = vec4( position, 1.0 );\n\n  fullScreenState.x *= uResolution.x/uQuadSize.x;\n  fullScreenState.y *= uResolution.y/uQuadSize.y;\n  float cornersProgress = mix(\n    mix(uCorners.z, uCorners.y, uv.x),\n    mix(uCorners.x, uCorners.w, uv.x),\n    uv.y\n  );\n\n  vec4 finalState = mix(defaultState, fullScreenState, cornersProgress) ;\n\n  vSize = mix(uQuadSize, uResolution, uProgress);\n\n  gl_Position = projectionMatrix * viewMatrix * finalState;\n}";
 },{}],"1pD2q":[function(require,module,exports) {
 var define;
 /**
@@ -33675,54 +33686,6 @@ var define;
   });
 });
 
-},{}],"1VFU5":[function(require,module,exports) {
-module.exports = require('./bundle-url').getBundleURL() + "texture.de48ce3c.jpg"
-},{"./bundle-url":"7h68L"}],"7h68L":[function(require,module,exports) {
-"use strict";
-
-/* globals document:readonly */
-var bundleURL = null;
-
-function getBundleURLCached() {
-  if (!bundleURL) {
-    bundleURL = getBundleURL();
-  }
-
-  return bundleURL;
-}
-
-function getBundleURL() {
-  try {
-    throw new Error();
-  } catch (err) {
-    var matches = ('' + err.stack).match(/(https?|file|ftp):\/\/[^)\n]+/g);
-
-    if (matches) {
-      return getBaseURL(matches[0]);
-    }
-  }
-
-  return '/';
-}
-
-function getBaseURL(url) {
-  return ('' + url).replace(/^((?:https?|file|ftp):\/\/.+)\/[^/]+$/, '$1') + '/';
-} // TODO: Replace uses with `new URL(url).origin` when ie11 is no longer supported.
-
-
-function getOrigin(url) {
-  let matches = ('' + url).match(/(https?|file|ftp):\/\/[^/]+/);
-
-  if (!matches) {
-    throw new Error('Origin not found');
-  }
-
-  return matches[0];
-}
-
-exports.getBundleURL = getBundleURLCached;
-exports.getBaseURL = getBaseURL;
-exports.getOrigin = getOrigin;
 },{}],"1iecp":[function(require,module,exports) {
 var define;
 (function (global, factory) {
@@ -37164,6 +37127,54 @@ var define;
   }
 });
 
+},{}],"1VFU5":[function(require,module,exports) {
+module.exports = require('./bundle-url').getBundleURL() + "texture.de48ce3c.jpg"
+},{"./bundle-url":"2yCSR"}],"2yCSR":[function(require,module,exports) {
+"use strict";
+
+/* globals document:readonly */
+var bundleURL = null;
+
+function getBundleURLCached() {
+  if (!bundleURL) {
+    bundleURL = getBundleURL();
+  }
+
+  return bundleURL;
+}
+
+function getBundleURL() {
+  try {
+    throw new Error();
+  } catch (err) {
+    var matches = ('' + err.stack).match(/(https?|file|ftp):\/\/[^)\n]+/g);
+
+    if (matches) {
+      return getBaseURL(matches[0]);
+    }
+  }
+
+  return '/';
+}
+
+function getBaseURL(url) {
+  return ('' + url).replace(/^((?:https?|file|ftp):\/\/.+)\/[^/]+$/, '$1') + '/';
+} // TODO: Replace uses with `new URL(url).origin` when ie11 is no longer supported.
+
+
+function getOrigin(url) {
+  let matches = ('' + url).match(/(https?|file|ftp):\/\/[^/]+/);
+
+  if (!matches) {
+    throw new Error('Origin not found');
+  }
+
+  return matches[0];
+}
+
+exports.getBundleURL = getBundleURLCached;
+exports.getBaseURL = getBaseURL;
+exports.getOrigin = getOrigin;
 },{}]},["2FmRy","6fOLN"], "6fOLN", "parcelRequire427e")
 
 //# sourceMappingURL=index.1397955d.js.map
