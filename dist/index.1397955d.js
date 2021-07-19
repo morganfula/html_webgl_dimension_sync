@@ -544,13 +544,12 @@ class Sketch {
     this.mesh = new _three.Mesh(this.geometry, this.material);
     this.scene.add(this.mesh);
     this.mesh.position.x = 300;
-    this.mesh.rotation.z = 0.5;
   }
   render() {
     this.time += 0.05;
     this.material.uniforms.time.value = this.time;
-    // this.material.uniforms.uProgress.value = this.settings.progress;
-    this.tl.progress(this.settings.progress);
+    this.material.uniforms.uProgress.value = this.settings.progress;
+    // this.tl.progress(this.settings.progress);
     this.mesh.rotation.x = this.time / 2000;
     this.mesh.rotation.y = this.time / 1000;
     this.renderer.render(this.scene, this.camera);
@@ -562,7 +561,7 @@ new Sketch({
   domElement: document.getElementById('container')
 });
 
-},{"three":"1lq1c","three/examples/jsm/controls/OrbitControls.js":"5mYmG","./shaders/fragment.glsl":"6JKfI","./shaders/vertex.glsl":"4OTxZ","@parcel/transformer-js/lib/esmodule-helpers.js":"3O9it","dat.gui":"1pD2q","gsap":"1iecp","url:./texture.jpg":"1VFU5"}],"1lq1c":[function(require,module,exports) {
+},{"three":"1lq1c","three/examples/jsm/controls/OrbitControls.js":"5mYmG","./shaders/fragment.glsl":"6JKfI","./shaders/vertex.glsl":"4OTxZ","@parcel/transformer-js/lib/esmodule-helpers.js":"7cZWh","dat.gui":"1pD2q","gsap":"1iecp","url:./texture.jpg":"1VFU5"}],"1lq1c":[function(require,module,exports) {
 var define;
 /**
 * @license
@@ -31160,7 +31159,7 @@ class MapControls extends OrbitControls {
   }
 }
 
-},{"three":"1lq1c","@parcel/transformer-js/lib/esmodule-helpers.js":"3O9it"}],"3O9it":[function(require,module,exports) {
+},{"three":"1lq1c","@parcel/transformer-js/lib/esmodule-helpers.js":"7cZWh"}],"7cZWh":[function(require,module,exports) {
 "use strict";
 
 exports.interopDefault = function (a) {
@@ -31205,7 +31204,7 @@ exports.export = function (dest, destName, get) {
 },{}],"6JKfI":[function(require,module,exports) {
 module.exports="#define GLSLIFY 1\nuniform float time;\nuniform float uProgress;\nuniform vec2 uTextureSize;\nuniform sampler2D uTexture;\nvarying vec2 vUv;\n\nvarying vec2 vSize;\n\nvec2 getUV(vec2 uv, vec2 textureSize, vec2 quadSize) {\n  vec2 tempUV = uv - vec2(0.5);\n\n  float quadAspect = quadSize.x/quadSize.y;\n  float textureAspect = textureSize.x /textureSize.y;\n  if(quadAspect<textureAspect){\n    tempUV = tempUV* vec2(quadAspect/textureAspect,1.);\n  } else {\n    tempUV = tempUV* vec2(1.,textureAspect/quadAspect);\n  }\n\n  tempUV += vec2(0.5);\n  return tempUV;\n}\n\nvoid main() {\n\n  vec2 correctUV = getUV(vUv, uTextureSize, vSize);\n  vec4 image = texture(uTexture, correctUV);\n  gl_FragColor = vec4(vUv, 0., 1.);\n  gl_FragColor = vec4(image);\n\n}";
 },{}],"4OTxZ":[function(require,module,exports) {
-module.exports="#define GLSLIFY 1\nuniform float time;\nuniform float uProgress;\nuniform vec2 uResolution;\nuniform vec2 uQuadSize;\nuniform vec4 uCorners;\n\nvarying vec2 vUv;\nvarying vec2 vSize;\nvoid main() {\n  vUv = uv;\n  vec4 defaultState = modelMatrix * vec4( position, 1.0 );\n  vec4 fullScreenState = vec4( position, 1.0 );\n\n  fullScreenState.x *= uResolution.x/uQuadSize.x;\n  fullScreenState.y *= uResolution.y/uQuadSize.y;\n  float cornersProgress = mix(\n    mix(uCorners.z, uCorners.y, uv.x),\n    mix(uCorners.x, uCorners.w, uv.x),\n    uv.y\n  );\n\n  vec4 finalState = mix(defaultState, fullScreenState, cornersProgress) ;\n\n  vSize = mix(uQuadSize, uResolution, uProgress);\n\n  gl_Position = projectionMatrix * viewMatrix * finalState;\n}";
+module.exports="#define GLSLIFY 1\nuniform float time;\nuniform float uProgress;\nuniform vec2 uResolution;\nuniform vec2 uQuadSize;\nuniform vec4 uCorners;\n\nvarying vec2 vUv;\nvarying vec2 vSize;\nvoid main() {\n  vUv = uv;\n  float PI = 3.1415926;\n  float sine = sin(PI * uProgress);\n  float waves = sine*0.1*sin(5.*length(uv) +5.* uProgress * 5.);\n  vec4 defaultState = modelMatrix * vec4( position, 1.0 );\n  vec4 fullScreenState = vec4( position, 1.0 );\n\n  fullScreenState.x *= uResolution.x/uQuadSize.x;\n  fullScreenState.y *= uResolution.y/uQuadSize.y;\n  float cornersProgress = mix(\n    mix(uCorners.z, uCorners.w, uv.x),\n    mix(uCorners.x, uCorners.y, uv.x),\n    uv.y\n  );\n\n  vec4 finalState = mix(defaultState, fullScreenState, uProgress + waves) ;\n\n  vSize = mix(uQuadSize, uResolution, uProgress);\n\n  gl_Position = projectionMatrix * viewMatrix * finalState;\n}";
 },{}],"1pD2q":[function(require,module,exports) {
 var define;
 /**
@@ -37129,7 +37128,7 @@ var define;
 
 },{}],"1VFU5":[function(require,module,exports) {
 module.exports = require('./bundle-url').getBundleURL() + "texture.de48ce3c.jpg"
-},{"./bundle-url":"2yCSR"}],"2yCSR":[function(require,module,exports) {
+},{"./bundle-url":"6dX6M"}],"6dX6M":[function(require,module,exports) {
 "use strict";
 
 /* globals document:readonly */
